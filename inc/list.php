@@ -1,5 +1,7 @@
-<?php
-    require_once __DIR__ . '\..\config\database.php';
+<?php 
+    require_once __DIR__ . '/../config/database.php';
+    require __DIR__ . '/../SourceQuery/bootstrap.php';
+    use xPaw\SourceQuery\SourceQuery;
 
     $errors = [];
 
@@ -7,53 +9,94 @@
     $rowstmt = $handler->prepare($rowcheckquery);
     $rowstmt->execute();
     $result = $rowstmt->fetchAll(PDO::FETCH_OBJ);
+    $rowscount = $rowstmt->rowCount();
 
-    if (!empty($result))
+    if ($rowscount == 0)
     {
-        echo 'kur';
-        $errors .= "There are no Servers in the List";
+        $errors[] .= 'There are no Servers in the List';
     }
 
     if (empty($errors))
     {
+        ?>
+        <table class="table table-responsive table-dark table-hover text-center">
+            <thead>
+            <tr>
+                <th>Status</th>
+                <th>Server Name</th>
+                <th>IP Address</th>
+                <th>Pl/Bots/Max</th>
+            </tr>
+            </thead>
+            <tbody>
 
+        <?php
+        $Query = new SourceQuery();
         foreach ($result as $row)
         {
             $ip = $row->ip;
-            $port = $row->port;
+            $port = intval($row->port);
 
-            $Query->Connect($ip, $port, 1, SourceQuery::GOLDSOURCE);
-            $ServerInfo = $Query->GetInfo();
-?>
-            <table class="table table-dark table-hover">
-                <thead>
+            $success = true;
+
+            try
+            {
+                $Query->Connect($ip, $port, 1, SourceQuery::GOLDSOURCE);
+                $ServerInfo = $Query->GetInfo();
+            }
+            catch(Exception $e )
+            {
+                $success = false;
+                // echo $e->getMessage();
+            }
+            finally
+            {
+                $Query->Disconnect();
+            }
+
+            switch ($success)
+            {
+                case true:
+                ?>
                 <tr>
-                    <th>Server Name</th>
-                    <th>IP Address</th>
-                    <th>Pl/Bots/Max</th>
+                    <td><img src="resources/online.png" title="This server is online" alt="online"/></td>
+                    <td class="text-success"><?php echo $ServerInfo['HostName']; ?></td>
+                    <td class="text-success"><?php echo $ip; ?></td>
+                    <td class="text-success"><?php echo $ServerInfo['Players'] - $ServerInfo['Bots'] . '/' . $ServerInfo['Bots'] . '/' . $ServerInfo['MaxPlayers']; ?></td>
                 </tr>
-                </thead>
-                <tbody>
+                <?php
+                break;
+
+                default:
+                ?>
                 <tr>
-                    <td><?php echo $ServerInfo['HostName']; ?></td>
-                    <td><?php echo SQ_SERVER_ADDR; ?></td>
-                    <td><?php echo $ServerInfo['Players'] - $ServerInfo['Bots'] . '/' . $ServerInfo['Bots'] . '/' . $ServerInfo['MaxPlayers']; ?></td>
+                    <td><img src="resources/offline.png" class="img-responsive" title="This server is offline" alt="offline"/></td>
+                    <td class="text-danger"><?php echo $row->HostName ?></td>
+                    <td class="text-danger"><?php echo $ip; ?></td>
+                    <td class="text-danger">0/0/0</td>
                 </tr>
-                </tbody>
-            </table>
-<?php 
+                <?php
+                break;
+            }
         }
+        ?>
+
+            </tbody>
+        </table>
+    <?php
     }
     else
     {
         ?>
-        <div class="text-warn">
+
+        <div class="alert alert-danger" role="alert">
             <?php
                 foreach ($errors as $error)
                 {
                     echo $error;
                 }
             ?>
-        </div
+        </div>
         <?php
     }
+?>

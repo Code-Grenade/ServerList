@@ -1,3 +1,12 @@
+<?php
+    require_once 'inc/session.php';
+
+    if (!isset($_SESSION['logged']))
+    {
+        header('Location: login.php');
+    }
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,14 +24,10 @@
 </head>
 
 <body>
-    <div class='container'>
-        <div class="row justify-content-center">
-            <div class="col-auto">
-                <?php
-                    include 'inc/list.php';
-                ?>
-            </div>
-        </div>
-    </div>
+    <!-- Header -->
+    <?php require_once 'inc/header.php'; ?>
+
+    <!--  Content -->
+
 </body>
-</html> 
+</html>

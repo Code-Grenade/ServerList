@@ -1,5 +1,7 @@
 <?php 
+    require_once __DIR__ . '/../config/config.php';
     require_once __DIR__ . '/../config/database.php';
+    require_once __DIR__ . '/../config/resources.php';
     require __DIR__ . '/../SourceQuery/bootstrap.php';
     use xPaw\SourceQuery\SourceQuery;
 
@@ -59,19 +61,23 @@
                 case true:
                 ?>
                 <tr>
-                    <td><img src="resources/online.png" title="This server is online" alt="online"/></td>
+                    <td><img src="<?php echo RESOURCES_FOLDER . ONLINE_ICON; ?>" title="This server is online" alt="online"/></td>
                     <td class="text-success"><?php echo $ServerInfo['HostName']; ?></td>
                     <td class="text-success"><?php echo $ip; ?></td>
                     <td class="text-success"><?php echo $ServerInfo['Players'] - $ServerInfo['Bots'] . '/' . $ServerInfo['Bots'] . '/' . $ServerInfo['MaxPlayers']; ?></td>
                 </tr>
                 <?php
+
+                $Updatehnquery = "UPDATE servers SET hostname=:hostname WHERE ip='{$ip}' AND port=$port;";
+                $Updatestmt = $handler->prepare($Updatehnquery);
+                $Updatestmt->execute(array(':hostname' => $ServerInfo['HostName']));
                 break;
 
                 default:
                 ?>
                 <tr>
-                    <td><img src="resources/offline.png" class="img-responsive" title="This server is offline" alt="offline"/></td>
-                    <td class="text-danger"><?php echo $row->HostName ?></td>
+                    <td><img src="<?php echo RESOURCES_FOLDER . OFFLINE_ICON; ?>" class="img-responsive" title="This server is offline" alt="offline"/></td>
+                    <td class="text-danger"><?php echo $row->hostname ?></td>
                     <td class="text-danger"><?php echo $ip; ?></td>
                     <td class="text-danger">0/0/0</td>
                 </tr>

@@ -1,4 +1,12 @@
-<?php 
+<?php
+
+    if (isset($_GET['detailed']))
+    {
+        $serverid = $_GET['detailed'];
+        require __DIR__ . '\\detailed.php';
+        return;
+    }
+
     require_once __DIR__ . '/../config/config.php';
     require_once __DIR__ . '/../config/database.php';
     require_once __DIR__ . '/../config/resources.php';
@@ -62,7 +70,7 @@
                 ?>
                 <tr>
                     <td><img src="<?php echo RESOURCES_FOLDER . ONLINE_ICON; ?>" title="This server is online" alt="online"/></td>
-                    <td class="text-success"><?php echo $ServerInfo['HostName']; ?></td>
+                    <td class="text-success"><a href="index.php?detailed=<?php echo $row->id; ?>" class="text text-success"><?php echo $ServerInfo['HostName']; ?></a></td>
                     <td class="text-success"><?php echo $ip; ?></td>
                     <td class="text-success"><?php echo $ServerInfo['Players'] - $ServerInfo['Bots'] . '/' . $ServerInfo['Bots'] . '/' . $ServerInfo['MaxPlayers']; ?></td>
                 </tr>
